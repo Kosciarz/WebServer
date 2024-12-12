@@ -1,12 +1,15 @@
-﻿// WebServer.cpp : Defines the entry point for the application.
-//
+﻿#include <boost/asio.hpp>
+#include <nlohmann/json.hpp>
 
-#include "WebServer.h"
+#include <iostream>
+#include <thread>
+#include <iomanip>
 
-using namespace std;
+using json = nlohmann::json;
 
 int main()
 {
-	cout << "Hello CMake." << endl;
-	return 0;
+    boost::asio::io_context io_context;
+
+    std::cout << std::setw(4) << json::meta() << std::endl;
 }
