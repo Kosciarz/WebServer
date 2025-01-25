@@ -1,8 +1,10 @@
-﻿// WebServer.h : Include file for standard system include files,
-// or project specific include files.
-
-#pragma once
+﻿#ifndef WEBSERVER_H
+#define WEBSERVER_H
 
 #include <iostream>
 
-// TODO: Reference additional headers your program requires here.
+class WebServer
+{
+};
+
+#endif // WEBSERVER_H

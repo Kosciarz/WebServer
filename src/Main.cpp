@@ -1,9 +1,9 @@
 ﻿#include <boost/asio.hpp>
 #include <nlohmann/json.hpp>
 
+#include <iomanip>
 #include <iostream>
 #include <thread>
-#include <iomanip>
 
 using json = nlohmann::json;
 
