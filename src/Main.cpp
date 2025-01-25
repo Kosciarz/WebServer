@@ -1,5 +1,6 @@
 ﻿#include <boost/asio.hpp>
 #include <nlohmann/json.hpp>
+#include "WebServer.h"
 
 #include <iomanip>
 #include <iostream>
