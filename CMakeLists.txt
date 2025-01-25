@@ -32,5 +32,5 @@ add_subdirectory(external/json)
 find_package(Boost REQUIRED COMPONENTS system)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
-target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::system nlohmann_json)
