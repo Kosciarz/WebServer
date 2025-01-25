@@ -10,14 +10,19 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(VCPKG_ROOT "${CMAKE_SOURCE_DIR}/external/vcpkg")
 set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
-set(CMAKE_PREFIX_PATH "${VCPKG_ROOT}/installed/x64-linux/include")
+set(CMAKE_PREFIX_PATH "${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/include")
+
+set(SOURCES
+  "src/Main.cpp"
+  "src/WebServer.cpp"
+)
 
 add_subdirectory(external/json)
 
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost 1.86.0 REQUIRED COMPONENTS system)
 
-
-add_executable(${PROJECT_NAME} "src/Main.cpp" "include/WebServer.h")
+add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(${PROJECT_NAME} PRIVATE Boost::system nlohmann_json)
 
