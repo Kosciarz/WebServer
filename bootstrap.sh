@@ -11,3 +11,6 @@ cd external/vcpkg
 
 # Install dependencies
 ./vcpkg install boost-asio boost-system
+
+# Navigate back to root
+cd ../..

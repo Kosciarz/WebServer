@@ -20,7 +20,7 @@ IF NOT EXIST "external\vcpkg\vcpkg.exe" (
 REM Install dependencies using vcpkg (example: Boost)
 echo Installing dependencies with vcpkg...
 call .\vcpkg install boost-system boost-asio 
-cd ..
+cd ../..
 
 REM Return to the root directory
-echo Bootstrap complete. Proceed to the build steps.
+echo Bootstrap complete. 

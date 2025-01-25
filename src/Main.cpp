@@ -4,12 +4,15 @@
 #include <iostream>
 #include <thread>
 #include <iomanip>
+#include <functional>
 
 using json = nlohmann::json;
 
+using namespace boost::asio;
+using namespace boost::asio::ip;
+ 
 int main()
 {
-    boost::asio::io_context io_context;
 
     std::cout << std::setw(4) << json::meta() << std::endl;
 }
