@@ -19,7 +19,7 @@ set(SOURCES
 
 add_subdirectory(external/json)
 
-find_package(Boost 1.86.0 REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system)
 
 add_executable(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})

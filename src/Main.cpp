@@ -7,11 +7,8 @@
 
 using json = nlohmann::json;
 
-using namespace boost::asio;
-using namespace boost::asio::ip;
  
 int main()
 {
-
     std::cout << std::setw(4) << json::meta() << std::endl;
 }

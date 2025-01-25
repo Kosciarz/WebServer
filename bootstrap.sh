@@ -1,15 +1,15 @@
 #!/bin/bash
 
-# Initialize submodule if needed
+echo Initializing submodules if needed
 git submodule update --init --recursive
 
 # Navigate to vcpkg
 cd external/vcpkg
 
-# Bootstrap vcpkg
+echo Bootstraping vcpkg
 ./bootstrap-vcpkg.sh
 
-# Install dependencies
+echo Installing dependencies
 ./vcpkg install boost-asio boost-system
 
 # Navigate back to root
