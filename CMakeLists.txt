@@ -10,7 +10,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(VCPKG_ROOT "${CMAKE_SOURCE_DIR}/external/vcpkg")
 set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
-set(CMAKE_PREFIX_PATH "${VCPKG_ROOT}/installed/x64-windows/include")
+set(CMAKE_PREFIX_PATH "${VCPKG_ROOT}/installed/x64-linux/include")
 
 add_subdirectory(external/json)
 
