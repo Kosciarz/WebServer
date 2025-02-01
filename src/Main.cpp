@@ -23,8 +23,6 @@ static void HandleRequest(tcp::socket socket)
     {
         std::array<char, 1024 * 5> request_buffer{};
 
-        socket.wait(tcp::socket::wait_read);
-
         socket.async_read_some(boost::asio::buffer(request_buffer.data(), request_buffer.size()),
             [&](const boost::system::error_code& ec, std::size_t bytes_read)
             {
@@ -32,13 +30,12 @@ static void HandleRequest(tcp::socket socket)
                     std::cout << "Bytes read: " << bytes_read << '\n';
                 else
                     std::cerr << "Error: " << ec.message() << '\n';
-            }
-        );
+            });
 
         std::cout << "Request: " << std::string(request_buffer.data(), request_buffer.size()) << '\n';
 
         std::string requested_path = GetRequestedPath(request_buffer);
-        
+
         const std::string reply = "HTTP/1.1 200 OK\r\n\r\nRequested path: " + requested_path + "\r\n";
 
         socket.async_write_some(boost::asio::buffer(reply.data(), reply.size()),
@@ -48,8 +45,7 @@ static void HandleRequest(tcp::socket socket)
                     std::cout << "Bytes written: " << bytes_written << '\n';
                 else
                     std::cerr << "Error: " << ec.message() << '\n';
-            }    
-        );
+            });
 
         socket.close();
     }
