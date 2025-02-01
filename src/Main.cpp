@@ -11,11 +11,12 @@ using namespace boost::asio::ip;
 
 static void HandleRequest(tcp::socket socket)
 {
-    try {
+    try
+    {
         std::array<char, 1024 * 5> buffer{};
 
         auto bytes_read = socket.read_some(boost::asio::buffer(buffer.data(), buffer.size()));
-    
+
         std::cout << "Request: " << std::string(buffer.data(), bytes_read) << '\n';
 
     }
