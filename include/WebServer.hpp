@@ -19,6 +19,8 @@ public:
         StartAccept();
     }
 
+    void Stop();
+
 private:
     void StartAccept();
 
