@@ -4,4 +4,4 @@ out/
 build/
 *.iml
 cmake-build-debug/
-/.vscode
+.vscode/
