@@ -10,7 +10,8 @@
 using namespace boost::asio::ip;
 
 WebServer::WebServer(boost::asio::io_context& io_context)
-    : m_acceptor(io_context, tcp::endpoint(tcp::v4(), 8080)),
+    : m_io_context(io_context),
+      m_acceptor(io_context, tcp::endpoint(tcp::v4(), 8080)),
       m_socket(io_context),
       m_request_buffer{}
 {
@@ -52,7 +53,7 @@ void WebServer::HandleRead(const boost::system::error_code& ec, std::size_t byte
         const std::string reply = "HTTP/1.1 200 OK\r\n\r\nRequested path: " + requested_path + "\r\n";
 
         boost::asio::async_write(m_socket,
-            boost::asio::buffer(reply),
+            boost::asio::buffer(reply.data(), reply.size()),
             std::bind(&WebServer::HandleWrite, this, std::placeholders::_1, std::placeholders::_2));
     }
     else
@@ -68,6 +69,7 @@ void WebServer::HandleWrite(const boost::system::error_code& ec, std::size_t byt
     {
         std::cout << "Bytes transfered: " << bytes_transferred << '\n';
         m_socket.close();
+        m_io_context.stop();
     }
     else
     {
