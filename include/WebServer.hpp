@@ -1,5 +1,5 @@
-﻿#ifndef WEBSERVER_H
-#define WEBSERVER_H
+﻿#ifndef WEB_SERVER_H
+#define WEB_SERVER_H
 
 #include <boost/asio.hpp>
 
@@ -26,4 +26,4 @@ private:
     std::array<char, 1024> m_request_buffer;
 };
 
-#endif // WEBSERVER_H
+#endif //WEB_SERVER_H
