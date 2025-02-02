@@ -1,9 +1,11 @@
 ﻿cmake_minimum_required(VERSION 3.20)
 
 # Set windows version to 7 to enable websocket support
-add_definitions(-D_WIN32_WINNT=0x0601)
+if(WIN32)
+  add_definitions(-D_WIN32_WINNT=0x0601)
+endif()
 
-if (POLICY CMP0167)
+if(POLICY CMP0167)
   cmake_policy(SET CMP0167 NEW)
 endif()
 
