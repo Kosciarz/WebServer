@@ -11,9 +11,11 @@ public:
 private:
     void StartAccept();
 
-    void ReadRequest();
+    void HandleAccept(const boost::system::error_code& ec);
 
-    void HandleRequest();
+    void HandleRead(const boost::system::error_code& ec, std::size_t bytes_read);
+
+    void HandleWrite(const boost::system::error_code& ec, std::size_t bytes_transferred);
 
     std::string GetRequestedPath();
 
