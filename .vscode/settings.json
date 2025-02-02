@@ -108,6 +108,7 @@
         "xutility": "cpp",
         "*.tcc": "cpp",
         "string_view": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "semaphore": "cpp"
     }
 }

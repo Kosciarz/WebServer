@@ -1,82 +1,76 @@
 ﻿#include "WebServer.hpp"
 #include <boost/asio.hpp>
-#include <nlohmann/json.hpp>
 
 #include <algorithm>
-#include <iomanip>
 #include <iostream>
-#include <span>
+#include <memory>
 
 using namespace boost::asio::ip;
 
-static std::string GetRequestedPath(std::span<char> request_buffer)
+std::string GetRequestedPath(std::array<char, 1024> buffer)
 {
     std::string requested_path{};
-    for (auto it = std::ranges::find(request_buffer, '/'); *it != ' '; ++it)
-        requested_path += *it;
+    if (auto it = std::find(buffer.begin(), buffer.end(), '/'); it != buffer.end())
+        for (; *it != ' '; ++it)
+            requested_path += *it;
     return requested_path;
 }
 
-static void HandleRequest(tcp::socket socket)
+void HandleRequest(std::shared_ptr<tcp::socket> socket, boost::asio::io_context& io_context)
 {
-    try
-    {
-        std::array<char, 1024 * 5> request_buffer{};
+    std::array<char, 1024> request_buffer{};
 
-        socket.wait(tcp::socket::wait_read);
+    socket->wait(tcp::socket::wait_read);
 
-        socket.async_read_some(boost::asio::buffer(request_buffer.data(), request_buffer.size()),
-            [&](const boost::system::error_code& ec, std::size_t bytes_read)
+    boost::asio::async_read(*socket,
+        boost::asio::buffer(request_buffer.data(), request_buffer.size()),
+        [&](const boost::system::error_code& ec, std::size_t bytes_read)
+        {
+            if (!ec)
+                std::cout << "Bytes read: " << bytes_read << '\n';
+            else
             {
-                if (!ec)
-                    std::cout << "Bytes read: " << bytes_read << '\n';
-                else
-                    std::cerr << "Error: " << ec.message() << '\n';
+                std::cerr << "Read error: " << ec.message() << '\n';
+                socket->close();
             }
-        );
+        });
 
-        std::cout << "Request: " << std::string(request_buffer.data(), request_buffer.size()) << '\n';
+    std::cout << std::string(request_buffer.data(), request_buffer.size()) << '\n';
 
-        std::string requested_path = GetRequestedPath(request_buffer);
-        
-        const std::string reply = "HTTP/1.1 200 OK\r\n\r\nRequested path: " + requested_path + "\r\n";
+    std::string requested_path = GetRequestedPath(request_buffer);
 
-        socket.async_write_some(boost::asio::buffer(reply.data(), reply.size()),
-            [&](const boost::system::error_code& ec, std::size_t bytes_written)
+    const std::string reply = "HTTP/1.1 200 OK\r\n\r\nRequested path: " + requested_path + "\r\n";
+
+    boost::asio::async_write(*socket,
+        boost::asio::buffer(reply.data(), reply.size()),
+        [&](const boost::system::error_code& ec, std::size_t bytes_written)
+        {
+            if (!ec)
+                std::cout << "Bytes written: " << bytes_written << '\n';
+            else
             {
-                if (!ec)
-                    std::cout << "Bytes written: " << bytes_written << '\n';
-                else
-                    std::cerr << "Error: " << ec.message() << '\n';
-            }    
-        );
+                std::cerr << "Write error: " << ec.message() << '\n';
+                socket->close();
+            }
+        });
 
-        socket.close();
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "Error: " << e.what() << '\n';
-    }
+    socket->close();
+    io_context.stop();
 }
 
 int main()
 {
-    try
-    {
-        boost::asio::io_context io_context;
+    boost::asio::io_context io_context;
+    boost::asio::io_context::work work(io_context);
+    tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8080));
 
-        tcp::acceptor acceptor(io_context, tcp::endpoint(tcp::v4(), 8080));
-        std::cout << "Listening on port 80... " << '\n';
-
-        while (true)
+    auto socket = std::make_shared<tcp::socket>(io_context);
+    acceptor.async_accept(*socket,
+        [&](const boost::system::error_code& ec)
         {
-            tcp::socket socket(io_context);
-            acceptor.accept(socket);
-            HandleRequest(std::move(socket));
-        }
-    }
-    catch (const std::exception& e)
-    {
-        std::cerr << "Error: " << e.what() << '\n';
-    }
+            if (!ec)
+                HandleRequest(socket, io_context);
+        });
+
+    io_context.run();
 }
