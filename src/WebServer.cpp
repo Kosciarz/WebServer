@@ -6,6 +6,18 @@
 #include <iostream>
 #include <string>
 
+using namespace boost::asio::ip;
+
+WebServer::WebServer(boost::asio::io_context& io_context)
+    : m_io_context(io_context),
+      m_acceptor{io_context, tcp::endpoint(tcp::v4(), 8080)},
+      m_socket{io_context},
+      m_request_buffer{}
+{
+    std::cout << "Listening on port 8080... " << '\n';
+    StartAccept();
+}
+
 void WebServer::StartAccept()
 {
     m_acceptor.async_accept(m_socket,
@@ -27,21 +39,17 @@ void WebServer::StartAccept()
 
 void WebServer::ReadRequest()
 {
-    std::array<char, 1024> request_buffer{};
-
     m_socket.wait(tcp::socket::wait_read);
 
-    boost::asio::async_read(m_socket,
-        boost::asio::buffer(request_buffer.data(), request_buffer.size()),
+    m_socket.async_read_some(boost::asio::buffer(m_request_buffer),
         [&](const boost::system::error_code& ec, std::size_t bytes_read)
         {
             if (!ec)
             {
                 std::cout << "Bytes read: " << bytes_read << '\n';
-                m_request = std::string(request_buffer.data(), bytes_read);
                 std::cout << "Request: " << '\n'
-                          << m_request << '\n';
-                HandleRequest();
+                          << std::string(m_request_buffer.data(), bytes_read) << '\n';
+                // HandleRequest();
             }
             else
             {
@@ -51,39 +59,33 @@ void WebServer::ReadRequest()
         });
 }
 
-void WebServer::HandleRequest()
-{
-    std::string requested_path = GetRequestedPath();
+// void WebServer::HandleRequest()
+// {
+//     const std::string requested_path = GetRequestedPath();
+//     const std::string reply = "HTTP/1.1 200 OK\r\nRequested path: " + requested_path + "\r\n";
 
-    const std::string reply =
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Length: " +
-        std::to_string(requested_path.size()) + "\r\n" +
-        "Content-Type: text/plain\r\n"
-        "\r\n" +
-        "Requested path: " + requested_path + "\r\n";
+//     m_io_context.stop();
+    // boost::asio::async_write(m_socket,
+    //     boost::asio::buffer(reply),
+    //     [this](const boost::system::error_code& ec, std::size_t bytes_transferred)
+    //     {
+    //         if (!ec)
+    //         {
+    //             std::cout << "Bytes written: " << bytes_transferred << '\n';
+    //             m_socket.close();
+    //         }
+    //         else
+    //         {
+    //             std::cerr << "Write error: " << ec.message() << '\n';
+    //             m_socket.close();
+    //         }
+    //     });
 
-    boost::asio::async_write(m_socket,
-        boost::asio::buffer(reply.data(), reply.size()),
-        [this](const boost::system::error_code& ec, std::size_t bytes_written)
-        {
-            if (!ec)
-            {
-                std::cout << "Bytes written: " << bytes_written << '\n';
-                m_socket.close();
-            }
-            else
-            {
-                std::cerr << "Write error: " << ec.message() << '\n';
-                m_socket.close();
-            }
-        });
-}
 
 std::string WebServer::GetRequestedPath()
 {
     std::string path{};
-    if (auto it = std::find(m_request.begin(), m_request.end(), '/'); it != m_request.end())
+    if (auto it = std::find(m_request_buffer.begin(), m_request_buffer.end(), '/'); it != m_request_buffer.end())
         for (; *it != ' '; ++it)
             path += *it;
     return path;

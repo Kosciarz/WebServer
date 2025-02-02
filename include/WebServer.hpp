@@ -3,36 +3,25 @@
 
 #include <boost/asio.hpp>
 
-#include <iostream>
-#include <array>
-
-using namespace boost::asio::ip;
-
 class WebServer
 {
 public:
-    WebServer(boost::asio::io_context& io_context)
-        : m_acceptor{io_context, tcp::endpoint(tcp::v4(), 8080)},
-        m_socket{io_context},
-        m_request{}
-    {
-        std::cout << "Listening on port 8080... " << '\n';
-        StartAccept();
-    }
+    WebServer(boost::asio::io_context& io_context);
 
 private:
-    std::string GetRequestedPath();
-
     void StartAccept();
 
     void ReadRequest();
 
     void HandleRequest();
 
+    std::string GetRequestedPath();
+
 private:
-    tcp::acceptor m_acceptor;
-    tcp::socket m_socket;
-    std::string m_request;
+    boost::asio::io_context& m_io_context;
+    boost::asio::ip::tcp::acceptor m_acceptor;
+    boost::asio::ip::tcp::socket m_socket;
+    std::array<char, 1024> m_request_buffer;
 };
 
 #endif // WEBSERVER_H
