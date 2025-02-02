@@ -3,8 +3,8 @@
 
 #include <algorithm>
 #include <array>
-#include <string>
 #include <iostream>
+#include <string>
 
 void WebServer::StartAccept()
 {
@@ -27,16 +27,20 @@ void WebServer::StartAccept()
 
 void WebServer::ReadRequest()
 {
-    m_request_buffer.fill(0);
+    std::array<char, 1024> request_buffer{};
+
+    m_socket.wait(tcp::socket::wait_read);
+
     boost::asio::async_read(m_socket,
-        boost::asio::buffer(m_request_buffer.data(), m_request_buffer.size()),
-        [this](const boost::system::error_code& ec, std::size_t bytes_read)
+        boost::asio::buffer(request_buffer.data(), request_buffer.size()),
+        [&](const boost::system::error_code& ec, std::size_t bytes_read)
         {
             if (!ec)
             {
                 std::cout << "Bytes read: " << bytes_read << '\n';
-                std::cout << "Request: " << std::string(m_request_buffer.data(), bytes_read) << '\n';
-
+                m_request = std::string(request_buffer.data(), bytes_read);
+                std::cout << "Request: " << '\n'
+                          << m_request << '\n';
                 HandleRequest();
             }
             else
@@ -49,29 +53,15 @@ void WebServer::ReadRequest()
 
 void WebServer::HandleRequest()
 {
-    /*std::string request_str(m_request_buffer.data(), m_request_buffer.size());
-    std::string requested_path{};
-    auto it = std::find(request_str.begin(), request_str.end(), '/');
-    if (it != request_str.end())
-    {
-        for (; it != request_str.end() && *it != ' '; ++it)
-        {
-            requested_path += *it;
-        }
-    }*/
+    std::string requested_path = GetRequestedPath();
 
-    /*const std::string reply =
+    const std::string reply =
         "HTTP/1.1 200 OK\r\n"
-        "Content-Length: " + std::to_string(requested_path.size()) + "\r\n" +
+        "Content-Length: " +
+        std::to_string(requested_path.size()) + "\r\n" +
         "Content-Type: text/plain\r\n"
         "\r\n" +
-        "Requested path: " + requested_path + "\r\n";*/
-
-    const std::string reply = "HTTP/1.1 200 OK\r\n"
-                        "Content-Length: 13\r\n"
-                        "Content-Type: text/plain\r\n"
-                        "\r\n"
-                        "Hello, World!";
+        "Requested path: " + requested_path + "\r\n";
 
     boost::asio::async_write(m_socket,
         boost::asio::buffer(reply.data(), reply.size()),
@@ -79,7 +69,7 @@ void WebServer::HandleRequest()
         {
             if (!ec)
             {
-                std::cout << "Response sent!" << '\n';
+                std::cout << "Bytes written: " << bytes_written << '\n';
                 m_socket.close();
             }
             else
@@ -88,4 +78,13 @@ void WebServer::HandleRequest()
                 m_socket.close();
             }
         });
+}
+
+std::string WebServer::GetRequestedPath()
+{
+    std::string path{};
+    if (auto it = std::find(m_request.begin(), m_request.end(), '/'); it != m_request.end())
+        for (; *it != ' '; ++it)
+            path += *it;
+    return path;
 }
