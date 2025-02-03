@@ -2,11 +2,10 @@
 #define TCP_CONNECTION_H
 
 #include <boost/asio.hpp>
-
 #include <array>
 #include <memory>
 
-class TcpConnection
+class TcpConnection : public std::enable_shared_from_this<TcpConnection>
 {
 public:
     using pointer = std::shared_ptr<TcpConnection>;

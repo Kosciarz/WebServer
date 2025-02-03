@@ -20,22 +20,10 @@ TcpConnection::TcpConnection(boost::asio::io_context& io_context)
 void TcpConnection::Start()
 {
     std::cout << "Client connected!" << '\n';
-    m_socket.async_wait(tcp::socket::wait_read,
-        std::bind(&TcpConnection::HandleAccept, this, std::placeholders::_1));
-}
 
-void TcpConnection::HandleAccept(const boost::system::error_code& ec)
-{
-    if (!ec)
-    {
-        m_socket.async_read_some(boost::asio::buffer(m_request),
-            std::bind(&TcpConnection::HandleRead, this, std::placeholders::_1, std::placeholders::_2));
-    }
-    else
-    {
-        std::cerr << "Accept error: " << ec.message() << '\n';
-        m_socket.close();
-    }
+    m_socket.wait(tcp::socket::wait_read);
+    m_socket.async_read_some(boost::asio::buffer(m_request.data(), m_request.size()),
+        std::bind(&TcpConnection::HandleRead, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 void TcpConnection::HandleRead(const boost::system::error_code& ec, std::size_t bytes_read)
@@ -51,7 +39,7 @@ void TcpConnection::HandleRead(const boost::system::error_code& ec, std::size_t 
 
         boost::asio::async_write(m_socket,
             boost::asio::buffer(reply.data(), reply.size()),
-            std::bind(&TcpConnection::HandleWrite, this, std::placeholders::_1, std::placeholders::_2));
+            std::bind(&TcpConnection::HandleWrite, shared_from_this(), std::placeholders::_1, std::placeholders::_2));
     }
     else
     {

@@ -19,9 +19,9 @@ WebServer::WebServer(boost::asio::io_context& io_context)
 
 void WebServer::StartAccept()
 {
-    auto tcp_connection = std::make_shared<TcpConnection>(m_io_context);
-    m_acceptor.async_accept(tcp_connection->socket(),
-        std::bind(&WebServer::HandleAccept, this, tcp_connection, std::placeholders::_1));
+    auto new_connection = std::make_shared<TcpConnection>(m_io_context);
+    m_acceptor.async_accept(new_connection->socket(),
+        std::bind(&WebServer::HandleAccept, this, new_connection, std::placeholders::_1));
 }
 
 void WebServer::HandleAccept(TcpConnection::pointer new_connection, const boost::system::error_code& ec)
