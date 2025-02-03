@@ -26,7 +26,7 @@ private:
 
     void HandleWrite(const boost::system::error_code& ec, std::size_t bytes_transfered);
 
-    std::string GetRequestedPath();
+    std::string GetRequestedPath() const;
 
 private:
     boost::asio::ip::tcp::socket m_socket;

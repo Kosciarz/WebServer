@@ -20,8 +20,6 @@ TcpConnection::TcpConnection(boost::asio::io_context& io_context)
 void TcpConnection::Start()
 {
     std::cout << "Client connected!" << '\n';
-
-    m_socket.wait(tcp::socket::wait_read);
     m_socket.async_read_some(boost::asio::buffer(m_request.data(), m_request.size()),
         std::bind(&TcpConnection::HandleRead, this, std::placeholders::_1, std::placeholders::_2));
 }
@@ -62,7 +60,7 @@ void TcpConnection::HandleWrite(const boost::system::error_code& ec, std::size_t
     }
 }
 
-std::string TcpConnection::GetRequestedPath()
+std::string TcpConnection::GetRequestedPath() const
 {
     std::string path{};
     if (auto it = std::find(m_request.begin(), m_request.end(), '/'); it != m_request.end())
