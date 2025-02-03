@@ -32,7 +32,7 @@ private:
 
 private:
     boost::asio::ip::tcp::socket m_socket;
-    std::array<char, 1024> m_request;
+    std::array<char, 1024> m_request_buf;
 };
 
 #endif // TCP_CONNECTION_H

@@ -19,7 +19,7 @@ TcpConnection::TcpConnection(boost::asio::io_context& io_context)
 void TcpConnection::Start()
 {
     std::cout << "Client connected!" << '\n';
-    m_socket.async_read_some(boost::asio::buffer(m_request.data(), m_request.size()),
+    m_socket.async_read_some(boost::asio::buffer(m_request_buf.data(), m_request_buf.size()),
         std::bind(&TcpConnection::HandleRead, shared_from_this(), std::placeholders::_1, std::placeholders::_2));
 }
 
@@ -28,7 +28,7 @@ void TcpConnection::HandleRead(const boost::system::error_code& ec, std::size_t 
     if (!ec)
     {
         std::cout << "Request: " << '\n'
-                  << std::string(m_request.data(), bytes_read) << '\n';
+                  << std::string(m_request_buf.data(), bytes_read) << '\n';
 
         const std::string reply = "HTTP/1.1 200 OK\r\n\r\nRequested path: " + GetRequestedPath() + "\r\n";
 
@@ -60,7 +60,7 @@ void TcpConnection::HandleWrite(const boost::system::error_code& ec, std::size_t
 std::string TcpConnection::GetRequestedPath() const
 {
     std::string path{};
-    if (auto it = std::find(m_request.begin(), m_request.end(), '/'); it != m_request.end())
+    if (auto it = std::find(m_request_buf.begin(), m_request_buf.end(), '/'); it != m_request_buf.end())
         for (; *it != ' '; ++it)
             path += *it;
     return path;
