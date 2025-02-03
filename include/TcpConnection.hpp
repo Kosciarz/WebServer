@@ -2,8 +2,10 @@
 #define TCP_CONNECTION_H
 
 #include <boost/asio.hpp>
+
 #include <array>
 #include <memory>
+#include <string>
 
 class TcpConnection : public std::enable_shared_from_this<TcpConnection>
 {

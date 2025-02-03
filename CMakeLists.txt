@@ -19,7 +19,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(Boost_NO_WARN_NEW_VERSIONS 1)
 
-file(GLOB SOURCES CONFIGURE_DEPENDS "src/*.cpp")
+set(SOURCES
+    "src/Main.cpp"
+    "src/WebServer.cpp"
+    "src/TcpConnection.cpp"
+)
 
 add_subdirectory(external/json)
 
