@@ -4,12 +4,18 @@
 #include <boost/asio.hpp>
 
 #include <array>
+#include <exception>
+#include <filesystem>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <memory>
 #include <string>
 
+
 using namespace boost::asio::ip;
+using namespace std::placeholders;
+namespace fs = std::filesystem;
 
 TcpConnection::TcpConnection(boost::asio::io_context& io_context)
     : m_socket(io_context)
@@ -20,7 +26,7 @@ void TcpConnection::Start()
 {
     std::cout << "Client connected!" << '\n';
     m_socket.async_read_some(boost::asio::buffer(m_request_buf.data(), m_request_buf.size()),
-        std::bind(&TcpConnection::HandleRead, shared_from_this(), std::placeholders::_1, std::placeholders::_2));
+        std::bind(&TcpConnection::HandleRead, shared_from_this(), _1, _2));
 }
 
 void TcpConnection::HandleRead(const boost::system::error_code& ec, std::size_t bytes_read)
@@ -30,11 +36,21 @@ void TcpConnection::HandleRead(const boost::system::error_code& ec, std::size_t 
         std::cout << "Request: " << '\n'
                   << std::string(m_request_buf.data(), bytes_read) << '\n';
 
-        const std::string reply = "HTTP/1.1 200 OK\r\n\r\nRequested path: " + GetRequestedPath() + "\r\n";
+        std::string reply{};
+
+        try
+        {
+            const fs::path path("../../../www" + GetRequestedPath());
+            reply = "HTTP/1.1 200 OK\r\n\r\n" + GetFileContents(path) + "\r\n";
+        }
+        catch (const std::exception& e)
+        {
+            reply = "HTTP/1.1 400\r\n\r\n Not Found\r\n";
+        }
 
         boost::asio::async_write(m_socket,
             boost::asio::buffer(reply.data(), reply.size()),
-            std::bind(&TcpConnection::HandleWrite, shared_from_this(), std::placeholders::_1, std::placeholders::_2));
+            std::bind(&TcpConnection::HandleWrite, shared_from_this(), _1, _2));
     }
     else
     {
@@ -63,5 +79,22 @@ std::string TcpConnection::GetRequestedPath() const
     if (auto it = std::find(m_request_buf.begin(), m_request_buf.end(), '/'); it != m_request_buf.end())
         for (; *it != ' '; ++it)
             path += *it;
-    return path;
+
+    return (path == "/")? path + "index.html" : path;
+}
+
+std::string TcpConnection::GetFileContents(const fs::path& path)
+{
+    std::ifstream file(path);
+    if (!file.is_open())
+        throw std::runtime_error("Could not open file with path: " + path.string());
+
+    std::string contents{};
+    std::string file_line{};
+    while (std::getline(file, file_line))
+    {
+        contents += file_line + "\n";
+    }
+    file.close();
+    return contents;
 }

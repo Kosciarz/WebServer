@@ -6,7 +6,7 @@
 #include <array>
 #include <memory>
 #include <string>
-
+#include <filesystem>
 class TcpConnection : public std::enable_shared_from_this<TcpConnection>
 {
 public:
@@ -29,6 +29,8 @@ private:
     void HandleWrite(const boost::system::error_code& ec, std::size_t bytes_transfered);
 
     std::string GetRequestedPath() const;
+
+    std::string GetFileContents(const std::filesystem::path& path);
 
 private:
     boost::asio::ip::tcp::socket m_socket;
