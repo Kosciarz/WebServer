@@ -3,8 +3,9 @@
 
 #include "TcpConnection.hpp"
 
-#include <boost/asio.hpp>
-
+#include <boost/asio/io_context.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/system/error_code.hpp>
 class WebServer
 {
 public:

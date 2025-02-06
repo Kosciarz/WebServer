@@ -1,9 +1,12 @@
 #include "TcpConnection.hpp"
 #include "WebServer.hpp"
 
-#include <boost/asio.hpp>
+#include <boost/asio/buffer.hpp>
+#include <boost/asio/read.hpp>
+#include <boost/asio/write.hpp>
 
 #include <array>
+#include <chrono>
 #include <exception>
 #include <filesystem>
 #include <fstream>
@@ -11,7 +14,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
-
+#include <thread>
 
 using namespace boost::asio::ip;
 using namespace std::placeholders;
@@ -24,7 +27,8 @@ TcpConnection::TcpConnection(boost::asio::io_context& io_context)
 
 void TcpConnection::Start()
 {
-    std::cout << "Client connected!" << '\n';
+    std::cout << "Client connected. ID(" << ++TcpConnection::user_count << ")." << '\n';
+    // std::this_thread::sleep_for(std::chrono::seconds(20));
     m_socket.async_read_some(boost::asio::buffer(m_request_buf.data(), m_request_buf.size()),
         std::bind(&TcpConnection::HandleRead, shared_from_this(), _1, _2));
 }
@@ -56,6 +60,7 @@ void TcpConnection::HandleRead(const boost::system::error_code& ec, std::size_t 
     {
         std::cerr << "Read error: " << ec.message() << '\n';
         m_socket.close();
+        TcpConnection::user_count--;
     }
 }
 
@@ -65,11 +70,13 @@ void TcpConnection::HandleWrite(const boost::system::error_code& ec, std::size_t
     {
         std::cout << "Bytes transfered: " << bytes_transferred << '\n';
         m_socket.close();
+        TcpConnection::user_count--;
     }
     else
     {
         std::cerr << "Write error: " << ec.message() << '\n';
         m_socket.close();
+        TcpConnection::user_count--;
     }
 }
 
@@ -80,7 +87,7 @@ std::string TcpConnection::GetRequestedPath() const
         for (; *it != ' '; ++it)
             path += *it;
 
-    return (path == "/")? path + "index.html" : path;
+    return (path == "/") ? path + "index.html" : path;
 }
 
 std::string TcpConnection::GetFileContents(const fs::path& path)

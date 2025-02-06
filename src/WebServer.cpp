@@ -1,7 +1,8 @@
 #include "WebServer.hpp"
 #include "TcpConnection.hpp"
 
-#include <boost/asio.hpp>
+#include <boost/asio/buffer.hpp>
+#include <boost/system/error_code.hpp>
 
 #include <functional>
 #include <iostream>
