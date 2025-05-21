@@ -15,7 +15,9 @@ public:
     using pointer = std::shared_ptr<TcpConnection>;
 
 public:
-    TcpConnection(boost::asio::io_context& io_context);
+    TcpConnection(boost::asio::io_context& ioContext);
+
+    static pointer Create(boost::asio::io_context& ioContext);
 
     boost::asio::ip::tcp::socket& socket();
 
@@ -24,9 +26,9 @@ public:
 private:
     void HandleAccept(const boost::system::error_code& ec);
 
-    void HandleRead(const boost::system::error_code& ec, std::size_t bytes_read);
+    void HandleRead(const boost::system::error_code& ec, std::size_t bytesRead);
 
-    void HandleWrite(const boost::system::error_code& ec, std::size_t bytes_transfered);
+    void HandleWrite(const boost::system::error_code& ec, std::size_t bytesTransfered);
 
     std::string GetRequestedPath() const;
 

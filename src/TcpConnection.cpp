@@ -21,25 +21,30 @@ using namespace std::placeholders;
 
 namespace fs = std::filesystem;
 
-TcpConnection::TcpConnection(boost::asio::io_context& io_context)
-    : m_Socket(io_context)
+TcpConnection::TcpConnection(boost::asio::io_context& ioContext)
+    : m_Socket{ioContext}
 {
+}
+
+TcpConnection::pointer TcpConnection::Create(boost::asio::io_context& ioContext)
+{
+    return std::make_shared<TcpConnection>(ioContext);
 }
 
 void TcpConnection::Start()
 {
     std::cout << "Client connected. ID(" << ++TcpConnection::s_UserCount << ")." << '\n';
-    // std::this_thread::sleep_for(std::chrono::seconds(20));
+
     m_Socket.async_read_some(boost::asio::buffer(m_RequestBuffer.data(), m_RequestBuffer.size()),
         std::bind(&TcpConnection::HandleRead, shared_from_this(), _1, _2));
 }
 
-void TcpConnection::HandleRead(const boost::system::error_code& ec, std::size_t bytes_read)
+void TcpConnection::HandleRead(const boost::system::error_code& ec, std::size_t bytesRead)
 {
     if (!ec)
     {
         std::cout << "Request: " << '\n'
-                  << std::string(m_RequestBuffer.data(), bytes_read) << '\n';
+                  << std::string(m_RequestBuffer.data(), bytesRead) << '\n';
 
         std::string reply{};
 
@@ -65,10 +70,10 @@ void TcpConnection::HandleRead(const boost::system::error_code& ec, std::size_t 
     }
 }
 
-void TcpConnection::HandleWrite(const boost::system::error_code& ec, std::size_t bytes_transferred)
+void TcpConnection::HandleWrite(const boost::system::error_code& ec, std::size_t bytesTransfered)
 {
     if (!ec)
-        std::cout << "Bytes transfered: " << bytes_transferred << '\n';
+        std::cout << "Bytes transfered: " << bytesTransfered << '\n';
     else
         std::cerr << "Write error: " << ec.message() << '\n';
 
