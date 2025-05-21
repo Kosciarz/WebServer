@@ -1,11 +1,11 @@
-﻿#ifndef WEB_SERVER_H
-#define WEB_SERVER_H
+﻿#pragma once
 
 #include "TcpConnection.hpp"
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/system/error_code.hpp>
+
 class WebServer
 {
 public:
@@ -17,8 +17,6 @@ private:
     void HandleAccept(TcpConnection::pointer new_connection, const boost::system::error_code& ec);
 
 private:
-    boost::asio::io_context& m_io_context;
-    boost::asio::ip::tcp::acceptor m_acceptor;
+    boost::asio::io_context& m_IoContext;
+    boost::asio::ip::tcp::acceptor m_Acceptor;
 };
-
-#endif // WEB_SERVER_H

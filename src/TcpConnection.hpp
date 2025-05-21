@@ -1,5 +1,4 @@
-#ifndef TCP_CONNECTION_H
-#define TCP_CONNECTION_H
+#pragma once
 
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/ip/tcp.hpp>
@@ -15,12 +14,10 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection>
 public:
     using pointer = std::shared_ptr<TcpConnection>;
 
+public:
     TcpConnection(boost::asio::io_context& io_context);
 
-    boost::asio::ip::tcp::socket& socket()
-    {
-        return m_socket;
-    }
+    boost::asio::ip::tcp::socket& socket();
 
     void Start();
 
@@ -36,9 +33,9 @@ private:
     std::string GetFileContents(const std::filesystem::path& path);
 
 private:
-    static inline std::size_t user_count = 0;
-    boost::asio::ip::tcp::socket m_socket;
-    std::array<char, 1024> m_request_buf;
+    boost::asio::ip::tcp::socket m_Socket;
+    std::array<char, 1024> m_RequestBuffer;
+    
+private:
+    inline static std::size_t s_UserCount = 0;
 };
-
-#endif // TCP_CONNECTION_H
