@@ -19,19 +19,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(Boost_NO_WARN_NEW_VERSIONS 1)
 
-set(SOURCES
-    "src/Main.cpp"
-    "src/WebServer.cpp"
-    "src/TcpConnection.cpp"
-)
-
-# add_subdirectory(external/json)
-
-find_package(Boost REQUIRED COMPONENTS system)
-
-add_executable(${PROJECT_NAME} ${SOURCES})
-
-target_include_directories(${PROJECT_NAME} PRIVATE ${Boost_INCLUDE_DIRS})
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/include)
-target_link_libraries(${PROJECT_NAME} PRIVATE Boost::system)
-# target_link_libraries(${PROJECT_NAME} PRIVATE Boost::system nlohmann_json)
+add_subdirectory(src)
