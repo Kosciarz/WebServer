@@ -6,9 +6,9 @@ int main()
 {
     try
     {
-        boost::asio::io_context io_context;
-        WebServer server(io_context);
-        io_context.run();
+        boost::asio::io_context ioContext;
+        WebServer server(ioContext);
+        ioContext.run();
     }
     catch (const std::exception& e)
     {

@@ -9,12 +9,12 @@
 class WebServer
 {
 public:
-    WebServer(boost::asio::io_context& io_context);
+    WebServer(boost::asio::io_context& ioContext);
 
 private:
     void StartAccept();
 
-    void HandleAccept(TcpConnection::pointer new_connection, const boost::system::error_code& ec);
+    void HandleAccept(TcpConnection::pointer newConnection, const boost::system::error_code& ec);
 
 private:
     boost::asio::io_context& m_IoContext;

@@ -20,7 +20,7 @@ WebServer::WebServer(boost::asio::io_context& ioContext)
 
 void WebServer::StartAccept()
 {
-    auto newConnection = std::make_shared<TcpConnection>(m_IoContext);
+    auto newConnection = TcpConnection::Create(m_IoContext);
     m_Acceptor.async_accept(newConnection->socket(),
         std::bind(&WebServer::HandleAccept, this, newConnection, std::placeholders::_1));
 }
