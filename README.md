@@ -14,12 +14,14 @@ Repository contains a simple web server written in C++ using Boost.Asio library.
     - On Windows:
 
       ```bash
+      cd scripts
       ./bootstrap.bat
       ```
 
     - On Linux:
 
       ```bash
+      cd scripts
       chmod +x ./bootstrap.sh
       ./bootstrap.sh
       ```

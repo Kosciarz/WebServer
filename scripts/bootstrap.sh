@@ -4,7 +4,7 @@ echo Initializing submodules if needed
 git submodule update --init --recursive
 
 # Navigate to vcpkg
-cd external/vcpkg
+cd ../external/vcpkg
 
 echo Bootstraping vcpkg
 ./bootstrap-vcpkg.sh
