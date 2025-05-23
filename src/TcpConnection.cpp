@@ -12,7 +12,6 @@
 
 #include "TcpConnection.hpp"
 #include "WebServer.hpp"
-#include "Result.hpp"
 
 using namespace asio::ip;
 
