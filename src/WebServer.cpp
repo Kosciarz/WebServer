@@ -4,7 +4,6 @@
 #include <asio/ip/tcp.hpp>
 #include <asio/error_code.hpp>
 
-#include <functional>
 #include <iostream>
 #include <memory>
 
@@ -21,8 +20,13 @@ WebServer::WebServer(asio::io_context& ioContext)
 void WebServer::StartAccept()
 {
     auto newConnection = TcpConnection::Create(m_IoContext);
-    m_Acceptor.async_accept(newConnection->socket(),
-        std::bind(&WebServer::HandleAccept, this, newConnection, std::placeholders::_1));
+    m_Acceptor.async_accept(
+        newConnection->socket(),
+        [this, &newConnection](const asio::error_code& ec)
+        {
+            this->HandleAccept(newConnection, ec);
+        }
+    );
 }
 
 void WebServer::HandleAccept(const TcpConnection::pointer& newConnection, const asio::error_code& ec)

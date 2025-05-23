@@ -8,6 +8,7 @@
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <cstddef>
 
 class TcpConnection : public std::enable_shared_from_this<TcpConnection>
 {
@@ -26,6 +27,8 @@ private:
     void HandleRead(const asio::error_code& ec, std::size_t bytesRead);
 
     void HandleWrite(const asio::error_code& ec, std::size_t bytesTransferred);
+
+    void CloseConnection();
 
     std::string GetRequestedPath() const;
 
