@@ -1,10 +1,3 @@
-#include "TcpConnection.hpp"
-#include "WebServer.hpp"
-
-#include <asio/buffer.hpp>
-#include <asio/read.hpp>
-#include <asio/write.hpp>
-
 #include <array>
 #include <stdexcept>
 #include <filesystem>
@@ -12,6 +5,14 @@
 #include <iostream>
 #include <memory>
 #include <string>
+
+#include <asio/buffer.hpp>
+#include <asio/read.hpp>
+#include <asio/write.hpp>
+
+#include "TcpConnection.hpp"
+#include "WebServer.hpp"
+#include "Result.hpp"
 
 using namespace asio::ip;
 

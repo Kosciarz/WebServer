@@ -21,14 +21,14 @@ public:
 
     void Start();
 
+    void CloseConnection();
+
     asio::ip::tcp::socket& socket();
 
 private:
     void HandleRead(const asio::error_code& ec, std::size_t bytesRead);
 
     void HandleWrite(const asio::error_code& ec, std::size_t bytesTransferred);
-
-    void CloseConnection();
 
     std::string GetRequestedPath() const;
 

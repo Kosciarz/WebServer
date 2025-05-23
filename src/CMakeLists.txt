@@ -9,6 +9,7 @@ set(SOURCES
 set(HEADERS
     "${SOURCE_DIR}/WebServer.hpp"
     "${SOURCE_DIR}/TcpConnection.hpp"
+    "${SOURCE_DIR}/Result.hpp"
 )
 
 set(EXE_NAME "WebServer")

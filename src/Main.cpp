@@ -1,9 +1,9 @@
-﻿#include "WebServer.hpp"
-
-#include <iostream>
+﻿#include <iostream>
 #include <exception>
 
 #include <asio/io_context.hpp>
+
+#include "WebServer.hpp"
 
 int main()
 {
