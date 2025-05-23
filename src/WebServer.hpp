@@ -2,21 +2,21 @@
 
 #include "TcpConnection.hpp"
 
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/system/error_code.hpp>
+#include <asio/io_context.hpp>
+#include <asio/ip/tcp.hpp>
+#include <asio/error_code.hpp>
 
 class WebServer
 {
 public:
-    WebServer(boost::asio::io_context& ioContext);
+    explicit WebServer(asio::io_context& ioContext);
 
 private:
     void StartAccept();
 
-    void HandleAccept(TcpConnection::pointer newConnection, const boost::system::error_code& ec);
+    void HandleAccept(const TcpConnection::pointer& newConnection, const asio::error_code& ec);
 
 private:
-    boost::asio::io_context& m_IoContext;
-    boost::asio::ip::tcp::acceptor m_Acceptor;
+    asio::io_context& m_IoContext;
+    asio::ip::tcp::acceptor m_Acceptor;
 };

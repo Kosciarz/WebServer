@@ -1,13 +1,16 @@
 ﻿#include "WebServer.hpp"
 
 #include <iostream>
+#include <exception>
+
+#include <asio/io_context.hpp>
 
 int main()
 {
     try
     {
-        boost::asio::io_context ioContext;
-        WebServer server(ioContext);
+        asio::io_context ioContext;
+        WebServer server{ioContext};
         ioContext.run();
     }
     catch (const std::exception& e)

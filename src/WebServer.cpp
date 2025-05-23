@@ -1,16 +1,16 @@
 #include "WebServer.hpp"
 #include "TcpConnection.hpp"
 
-#include <boost/asio/buffer.hpp>
-#include <boost/system/error_code.hpp>
+#include <asio/ip/tcp.hpp>
+#include <asio/error_code.hpp>
 
 #include <functional>
 #include <iostream>
 #include <memory>
 
-using namespace boost::asio::ip;
+using namespace asio::ip;
 
-WebServer::WebServer(boost::asio::io_context& ioContext)
+WebServer::WebServer(asio::io_context& ioContext)
     : m_IoContext{ioContext},
       m_Acceptor{ioContext, tcp::endpoint(tcp::v4(), 8080)}
 {
@@ -25,7 +25,7 @@ void WebServer::StartAccept()
         std::bind(&WebServer::HandleAccept, this, newConnection, std::placeholders::_1));
 }
 
-void WebServer::HandleAccept(TcpConnection::pointer newConnection, const boost::system::error_code& ec)
+void WebServer::HandleAccept(const TcpConnection::pointer& newConnection, const asio::error_code& ec)
 {
     if (!ec)
         newConnection->Start();
