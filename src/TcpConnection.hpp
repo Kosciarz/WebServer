@@ -21,8 +21,6 @@ public:
 
     void Start();
 
-    void CloseConnection();
-
     asio::ip::tcp::socket& socket();
 
 private:

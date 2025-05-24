@@ -6,7 +6,6 @@
 #include <asio/write.hpp>
 
 #include <array>
-#include <stdexcept>
 #include <filesystem>
 #include <fstream>
 #include <functional>
@@ -51,8 +50,7 @@ void TcpConnection::HandleRead(const asio::error_code& ec, const std::size_t byt
             << std::string{m_RequestBuffer.data(), bytesRead} << '\n';
 
         std::string reply{};
-
-            const auto path = fs::path{"../../../www"} / GetRequestedPath();
+        const auto path = fs::path{"../../../www"} / GetRequestedPath();
         if (const auto contents = GetFileContents(path); contents)
         {
             reply = "HTTP/1.1 200 OK\r\n\r\n" + *contents + "\r\n";
@@ -108,7 +106,7 @@ std::optional<std::string> TcpConnection::GetFileContents(const fs::path& path)
 
     const auto fileSize = std::filesystem::file_size(path);
     std::string contents(fileSize, 0);
-    file.read(contents.data(), fileSize);
+    file.read(contents.data(), static_cast<std::streamsize>(fileSize));
     return std::move(contents);
 }
 
