@@ -1,5 +1,4 @@
 #include "TcpConnection.hpp"
-#include "WebServer.hpp"
 
 #include <asio/buffer.hpp>
 #include <asio/read.hpp>
@@ -20,14 +19,14 @@ using namespace std::placeholders;
 
 namespace fs = std::filesystem;
 
-TcpConnection::TcpConnection(asio::io_context& ioContext)
-    : m_Socket{ioContext}, m_RequestBuffer{}
+TcpConnection::TcpConnection(asio::io_context& context, const std::filesystem::path& staticFileRoot)
+    : m_Socket{context}, m_RequestBuffer{}, m_StaticFilesRoot{staticFileRoot}
 {
 }
 
-TcpConnection::Pointer TcpConnection::Create(asio::io_context& ioContext)
+TcpConnection::Pointer TcpConnection::Create(asio::io_context& context, const std::filesystem::path& staticFileRoot)
 {
-    return std::make_shared<TcpConnection>(ioContext);
+    return std::make_shared<TcpConnection>(context, staticFileRoot);
 }
 
 void TcpConnection::Start()
@@ -43,15 +42,15 @@ void TcpConnection::Start()
     );
 }
 
-void TcpConnection::HandleRead(const asio::error_code& ec, const std::size_t bytesRead)
+void TcpConnection::HandleRead(const asio::error_code& readError, const std::size_t bytesRead)
 {
-    if (!ec)
+    if (!readError)
     {
         std::cout << "Request: " << '\n'
             << std::string{m_RequestBuffer.data(), bytesRead} << '\n';
 
-        const auto path = fs::current_path().parent_path().parent_path() / "www" / "index.html";
-        std::cout << std::format("Requested path: {}", path.string()) << '\n';
+        const auto path = m_StaticFilesRoot / "index.html";
+        std::cout << "Requested path: " << path.string() << '\n';
 
         std::string reply{};
         if (const auto contents = GetFileContents(path); contents)
@@ -66,29 +65,29 @@ void TcpConnection::HandleRead(const asio::error_code& ec, const std::size_t byt
         asio::async_write(
             m_Socket,
             asio::buffer(reply.data(), reply.size()),
-            [self = shared_from_this()](const asio::error_code& ec, const std::size_t bytesTransferred)
+            [self = shared_from_this()](const asio::error_code& writeError, const std::size_t bytesTransferred)
             {
-                self->HandleWrite(ec, bytesTransferred);
+                self->HandleWrite(writeError, bytesTransferred);
             }
         );
     }
     else
     {
-        std::cerr << "Read error: " << ec.message() << '\n';
+        std::cerr << "Read error: " << readError.message() << '\n';
         m_Socket.close();
         s_UserCount--;
     }
 }
 
-void TcpConnection::HandleWrite(const asio::error_code& ec, const std::size_t bytesTransferred)
+void TcpConnection::HandleWrite(const asio::error_code& writeError, const std::size_t bytesTransferred)
 {
-    if (!ec)
+    if (!writeError)
     {
         std::cout << "Bytes transferred: " << bytesTransferred << '\n';
     }
     else
     {
-        std::cerr << "Write error: " << ec.message() << '\n';
+        std::cerr << "Write error: " << writeError.message() << '\n';
     }
 
     m_Socket.close();
