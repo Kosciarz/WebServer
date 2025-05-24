@@ -1,18 +1,20 @@
-#include "WebServer.hpp"
-#include "TcpConnection.hpp"
-
-#include <boost/asio/buffer.hpp>
-#include <boost/system/error_code.hpp>
-
-#include <functional>
 #include <iostream>
 #include <memory>
+#include <filesystem>
 
-using namespace boost::asio::ip;
+#include <asio/ip/tcp.hpp>
+#include <asio/error_code.hpp>
 
-WebServer::WebServer(boost::asio::io_context& ioContext)
+#include "TcpConnection.hpp"
+#include "WebServer.hpp"
+
+using namespace asio::ip;
+namespace fs = std::filesystem;
+
+WebServer::WebServer(asio::io_context& ioContext)
     : m_IoContext{ioContext},
-      m_Acceptor{ioContext, tcp::endpoint(tcp::v4(), 8080)}
+      m_Acceptor{ioContext, tcp::endpoint(tcp::v4(), 8080)},
+      m_StaticFilesRoot{FindServerRoot() / "www"}
 {
     std::cout << "Listening on port 8080..." << '\n';
     StartAccept();
@@ -20,17 +22,36 @@ WebServer::WebServer(boost::asio::io_context& ioContext)
 
 void WebServer::StartAccept()
 {
-    auto newConnection = TcpConnection::Create(m_IoContext);
-    m_Acceptor.async_accept(newConnection->socket(),
-        std::bind(&WebServer::HandleAccept, this, newConnection, std::placeholders::_1));
+    auto connection = TcpConnection::Create(m_IoContext, m_StaticFilesRoot);
+    m_Acceptor.async_accept(
+        connection->Socket(),
+        [this, connection](const asio::error_code& ec)
+        {
+            this->HandleAccept(connection, ec);
+        }
+    );
 }
 
-void WebServer::HandleAccept(TcpConnection::pointer newConnection, const boost::system::error_code& ec)
+void WebServer::HandleAccept(const TcpConnection::Pointer& connection, const asio::error_code& ec)
 {
     if (!ec)
-        newConnection->Start();
+        connection->Start();
     else
         std::cerr << "Accept error: " << ec.message() << '\n';
 
     StartAccept();
+}
+
+fs::path WebServer::FindServerRoot()
+{
+    auto path = fs::current_path();
+    while (path.has_relative_path() && path.filename() != "WebServer")
+    {
+        if (path == path.root_path())
+        {
+            return {};
+        }
+        path = path.parent_path();
+    }
+    return path;
 }

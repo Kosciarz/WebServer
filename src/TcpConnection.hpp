@@ -1,43 +1,45 @@
 #pragma once
 
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/system/error_code.hpp>
-
 #include <array>
 #include <filesystem>
 #include <memory>
 #include <string>
+#include <cstddef>
+
+#include <asio/io_context.hpp>
+#include <asio/ip/tcp.hpp>
+#include <asio/error_code.hpp>
 
 class TcpConnection : public std::enable_shared_from_this<TcpConnection>
 {
 public:
-    using pointer = std::shared_ptr<TcpConnection>;
+    using Pointer = std::shared_ptr<TcpConnection>;
 
-public:
-    TcpConnection(boost::asio::io_context& ioContext);
+    explicit TcpConnection(asio::io_context& context, const std::filesystem::path& staticFileRoot);
 
-    static pointer Create(boost::asio::io_context& ioContext);
-
-    boost::asio::ip::tcp::socket& socket();
+    static Pointer Create(asio::io_context& context, const std::filesystem::path& staticFileRoot);
 
     void Start();
 
+    void CloseConnection();
+
+    asio::ip::tcp::socket& Socket();
+
 private:
-    void HandleAccept(const boost::system::error_code& ec);
+    void HandleRead(const asio::error_code& ec, std::size_t bytesRead);
 
-    void HandleRead(const boost::system::error_code& ec, std::size_t bytesRead);
-
-    void HandleWrite(const boost::system::error_code& ec, std::size_t bytesTransfered);
+    void HandleWrite(const asio::error_code& writeError, std::size_t bytesTransferred);
 
     std::string GetRequestedPath() const;
 
-    std::string GetFileContents(const std::filesystem::path& path);
+    static std::optional<std::string> GetFileContents(const std::filesystem::path& path);
 
 private:
-    boost::asio::ip::tcp::socket m_Socket;
+    asio::ip::tcp::socket m_Socket;
     std::array<char, 1024> m_RequestBuffer;
-    
+
+    std::filesystem::path m_StaticFilesRoot;
+
 private:
     inline static std::size_t s_UserCount = 0;
 };
