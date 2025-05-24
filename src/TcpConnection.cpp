@@ -1,9 +1,3 @@
-#include "TcpConnection.hpp"
-
-#include <asio/buffer.hpp>
-#include <asio/read.hpp>
-#include <asio/write.hpp>
-
 #include <array>
 #include <filesystem>
 #include <fstream>
@@ -13,6 +7,11 @@
 #include <string>
 #include <optional>
 #include <format>
+
+#include <asio/buffer.hpp>
+#include <asio/write.hpp>
+
+#include "TcpConnection.hpp"
 
 using namespace asio::ip;
 using namespace std::placeholders;
