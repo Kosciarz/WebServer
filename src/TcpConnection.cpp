@@ -35,11 +35,14 @@ void TcpConnection::Start()
 
     m_Socket.async_read_some(
         asio::buffer(m_RequestBuffer.data(), m_RequestBuffer.size()),
-        std::bind(&TcpConnection::HandleRead, shared_from_this(), _1, _2)
+        [self = shared_from_this()](const asio::error_code& ec, const std::size_t bytesRead)
+        {
+            self->HandleRead(ec, bytesRead);
+        }
     );
 }
 
-void TcpConnection::HandleRead(const asio::error_code& ec, std::size_t bytesRead)
+void TcpConnection::HandleRead(const asio::error_code& ec, const std::size_t bytesRead)
 {
     if (!ec)
     {
@@ -58,9 +61,13 @@ void TcpConnection::HandleRead(const asio::error_code& ec, std::size_t bytesRead
             reply = "HTTP/1.1 400\r\n\r\n Not Found\r\n";
         }
 
-        asio::async_write(m_Socket,
-                          asio::buffer(reply.data(), reply.size()),
-                          std::bind(&TcpConnection::HandleWrite, shared_from_this(), _1, _2)
+        asio::async_write(
+            m_Socket,
+            asio::buffer(reply.data(), reply.size()),
+            [self = shared_from_this()](const asio::error_code& ec, const std::size_t bytesTransferred)
+            {
+                self->HandleWrite(ec, bytesTransferred);
+            }
         );
     }
     else
@@ -71,7 +78,7 @@ void TcpConnection::HandleRead(const asio::error_code& ec, std::size_t bytesRead
     }
 }
 
-void TcpConnection::HandleWrite(const asio::error_code& ec, std::size_t bytesTransferred)
+void TcpConnection::HandleWrite(const asio::error_code& ec, const std::size_t bytesTransferred)
 {
     if (!ec)
         std::cout << "Bytes transferred: " << bytesTransferred << '\n';
