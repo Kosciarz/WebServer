@@ -42,6 +42,12 @@ void TcpConnection::Start()
     );
 }
 
+void TcpConnection::CloseConnection()
+{
+    m_Socket.close();
+    s_UserCount--;
+}
+
 void TcpConnection::HandleRead(const asio::error_code& readError, const std::size_t bytesRead)
 {
     if (!readError)
@@ -74,8 +80,7 @@ void TcpConnection::HandleRead(const asio::error_code& readError, const std::siz
     else
     {
         std::cerr << "Read error: " << readError.message() << '\n';
-        m_Socket.close();
-        s_UserCount--;
+        CloseConnection();
     }
 }
 
@@ -90,8 +95,7 @@ void TcpConnection::HandleWrite(const asio::error_code& writeError, const std::s
         std::cerr << "Write error: " << writeError.message() << '\n';
     }
 
-    m_Socket.close();
-    s_UserCount--;
+    CloseConnection();
 }
 
 std::string TcpConnection::GetRequestedPath() const
