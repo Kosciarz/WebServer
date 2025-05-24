@@ -15,7 +15,7 @@ class TcpConnection : public std::enable_shared_from_this<TcpConnection>
 public:
     using Pointer = std::shared_ptr<TcpConnection>;
 
-    explicit TcpConnection(asio::io_context& context, const std::filesystem::path& staticFileRoot);
+    explicit TcpConnection(asio::io_context& context, std::filesystem::path  staticFileRoot);
 
     static Pointer Create(asio::io_context& context, const std::filesystem::path& staticFileRoot);
 

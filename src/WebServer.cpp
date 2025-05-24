@@ -35,9 +35,13 @@ void WebServer::StartAccept()
 void WebServer::HandleAccept(const TcpConnection::Pointer& connection, const asio::error_code& ec)
 {
     if (!ec)
+    {
         connection->Start();
+    }
     else
+    {
         std::cerr << "Accept error: " << ec.message() << '\n';
+    }
 
     StartAccept();
 }

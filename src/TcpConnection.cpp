@@ -10,16 +10,16 @@
 
 #include <asio/buffer.hpp>
 #include <asio/write.hpp>
+#include <utility>
 
 #include "TcpConnection.hpp"
 
 using namespace asio::ip;
 using namespace std::placeholders;
-
 namespace fs = std::filesystem;
 
-TcpConnection::TcpConnection(asio::io_context& context, const std::filesystem::path& staticFileRoot)
-    : m_Socket{context}, m_RequestBuffer{}, m_StaticFilesRoot{staticFileRoot}
+TcpConnection::TcpConnection(asio::io_context& context, std::filesystem::path staticFileRoot)
+    : m_Socket{context}, m_RequestBuffer{}, m_StaticFilesRoot{std::move(staticFileRoot)}
 {
 }
 
