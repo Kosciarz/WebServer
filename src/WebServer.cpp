@@ -19,20 +19,20 @@ WebServer::WebServer(asio::io_context& ioContext)
 
 void WebServer::StartAccept()
 {
-    auto newConnection = TcpConnection::Create(m_IoContext);
+    auto connection = TcpConnection::Create(m_IoContext);
     m_Acceptor.async_accept(
-        newConnection->socket(),
-        [this, &newConnection](const asio::error_code& ec)
+        connection->Socket(),
+        [this, connection](const asio::error_code& ec)
         {
-            this->HandleAccept(newConnection, ec);
+            this->HandleAccept(connection, ec);
         }
     );
 }
 
-void WebServer::HandleAccept(const TcpConnection::pointer& newConnection, const asio::error_code& ec)
+void WebServer::HandleAccept(const TcpConnection::Pointer& connection, const asio::error_code& ec)
 {
     if (!ec)
-        newConnection->Start();
+        connection->Start();
     else
         std::cerr << "Accept error: " << ec.message() << '\n';
 

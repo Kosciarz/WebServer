@@ -13,7 +13,7 @@ public:
 private:
     void StartAccept();
 
-    void HandleAccept(const TcpConnection::pointer& newConnection, const asio::error_code& ec);
+    void HandleAccept(const TcpConnection::Pointer& connection, const asio::error_code& ec);
 
 private:
     asio::io_context& m_IoContext;

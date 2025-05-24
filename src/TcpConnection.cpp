@@ -13,6 +13,7 @@
 #include <memory>
 #include <string>
 #include <optional>
+#include <format>
 
 using namespace asio::ip;
 using namespace std::placeholders;
@@ -24,14 +25,14 @@ TcpConnection::TcpConnection(asio::io_context& ioContext)
 {
 }
 
-TcpConnection::pointer TcpConnection::Create(asio::io_context& ioContext)
+TcpConnection::Pointer TcpConnection::Create(asio::io_context& ioContext)
 {
     return std::make_shared<TcpConnection>(ioContext);
 }
 
 void TcpConnection::Start()
 {
-    std::cout << "Client connected. ID(" << ++s_UserCount << ")." << '\n';
+    std::cout << std::format("Client connected. ID: {}", ++s_UserCount) << '\n';
 
     m_Socket.async_read_some(
         asio::buffer(m_RequestBuffer.data(), m_RequestBuffer.size()),
@@ -49,8 +50,10 @@ void TcpConnection::HandleRead(const asio::error_code& ec, const std::size_t byt
         std::cout << "Request: " << '\n'
             << std::string{m_RequestBuffer.data(), bytesRead} << '\n';
 
+        const auto path = fs::current_path().parent_path().parent_path() / "www" / "index.html";
+        std::cout << std::format("Requested path: {}", path.string()) << '\n';
+
         std::string reply{};
-        const auto path = fs::path{"../../../www"} / GetRequestedPath();
         if (const auto contents = GetFileContents(path); contents)
         {
             reply = "HTTP/1.1 200 OK\r\n\r\n" + *contents + "\r\n";
@@ -80,9 +83,13 @@ void TcpConnection::HandleRead(const asio::error_code& ec, const std::size_t byt
 void TcpConnection::HandleWrite(const asio::error_code& ec, const std::size_t bytesTransferred)
 {
     if (!ec)
+    {
         std::cout << "Bytes transferred: " << bytesTransferred << '\n';
+    }
     else
+    {
         std::cerr << "Write error: " << ec.message() << '\n';
+    }
 
     m_Socket.close();
     s_UserCount--;
@@ -110,7 +117,7 @@ std::optional<std::string> TcpConnection::GetFileContents(const fs::path& path)
     return std::move(contents);
 }
 
-tcp::socket& TcpConnection::socket()
+tcp::socket& TcpConnection::Socket()
 {
     return m_Socket;
 }
