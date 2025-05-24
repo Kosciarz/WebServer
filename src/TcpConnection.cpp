@@ -1,19 +1,22 @@
-#include <array>
-#include <stdexcept>
-#include <filesystem>
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <string>
+#include "TcpConnection.hpp"
+#include "WebServer.hpp"
 
 #include <asio/buffer.hpp>
 #include <asio/read.hpp>
 #include <asio/write.hpp>
 
-#include "TcpConnection.hpp"
-#include "WebServer.hpp"
+#include <array>
+#include <stdexcept>
+#include <filesystem>
+#include <fstream>
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <optional>
 
 using namespace asio::ip;
+using namespace std::placeholders;
 
 namespace fs = std::filesystem;
 
@@ -45,16 +48,16 @@ void TcpConnection::HandleRead(const asio::error_code& ec, const std::size_t byt
     if (!ec)
     {
         std::cout << "Request: " << '\n'
-            << std::string(m_RequestBuffer.data(), bytesRead) << '\n';
+            << std::string{m_RequestBuffer.data(), bytesRead} << '\n';
 
         std::string reply{};
 
-        try
-        {
             const auto path = fs::path{"../../../www"} / GetRequestedPath();
-            reply = "HTTP/1.1 200 OK\r\n\r\n" + GetFileContents(path) + "\r\n";
+        if (const auto contents = GetFileContents(path); contents)
+        {
+            reply = "HTTP/1.1 200 OK\r\n\r\n" + *contents + "\r\n";
         }
-        catch (const std::exception&)
+        else
         {
             reply = "HTTP/1.1 400\r\n\r\n Not Found\r\n";
         }
@@ -71,7 +74,8 @@ void TcpConnection::HandleRead(const asio::error_code& ec, const std::size_t byt
     else
     {
         std::cerr << "Read error: " << ec.message() << '\n';
-        CloseConnection();
+        m_Socket.close();
+        s_UserCount--;
     }
 }
 
@@ -82,11 +86,6 @@ void TcpConnection::HandleWrite(const asio::error_code& ec, const std::size_t by
     else
         std::cerr << "Write error: " << ec.message() << '\n';
 
-    CloseConnection();
-}
-
-void TcpConnection::CloseConnection()
-{
     m_Socket.close();
     s_UserCount--;
 }
@@ -101,16 +100,16 @@ std::string TcpConnection::GetRequestedPath() const
     return (path == "/") ? path + "index.html" : path;
 }
 
-std::string TcpConnection::GetFileContents(const fs::path& path)
+std::optional<std::string> TcpConnection::GetFileContents(const fs::path& path)
 {
     std::ifstream file(path);
     if (!file)
-        throw std::runtime_error("Could not open file with path: " + path.string());
+        return std::nullopt;
 
     const auto fileSize = std::filesystem::file_size(path);
     std::string contents(fileSize, 0);
     file.read(contents.data(), fileSize);
-    return contents;
+    return std::move(contents);
 }
 
 tcp::socket& TcpConnection::socket()

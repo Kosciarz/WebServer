@@ -32,7 +32,7 @@ private:
 
     std::string GetRequestedPath() const;
 
-    static std::string GetFileContents(const std::filesystem::path& path);
+    static std::optional<std::string> GetFileContents(const std::filesystem::path& path);
 
 private:
     asio::ip::tcp::socket m_Socket;
