@@ -38,42 +38,54 @@ public:
     T& Value() &
     {
         if (!m_Success)
+        {
             throw std::runtime_error{"Attempted to access value in an Err result"};
+        }
         return m_Value;
     }
 
     const T& Value() const &
     {
         if (!m_Success)
+        {
             throw std::runtime_error{"Attempted to access value in an Err result"};
+        }
         return m_Value;
     }
 
     T&& Value() &&
     {
         if (!m_Success)
+        {
             throw std::runtime_error{"Attempted to access value in an Err result"};
+        }
         return std::move(m_Value);
     }
 
     E& Error() &
     {
         if (m_Success)
+        {
             throw std::runtime_error{"Attempted to access error in an Ok result"};
+        }
         return m_Error;
     }
 
     const E& Error() const &
     {
         if (m_Success)
+        {
             throw std::runtime_error{"Attempted to access error in an Ok result"};
+        }
         return m_Error;
     }
 
     E&& Error() &&
     {
         if (m_Success)
+        {
             throw std::runtime_error{"Attempted to access error in an Ok result"};
+        }
         return m_Error;
     }
 
@@ -127,21 +139,27 @@ public:
     E& Error() &
     {
         if (m_Success)
+        {
             throw std::runtime_error{"Attempted to access error in an Ok result"};
+        }
         return m_Error;
     }
 
     const E& Error() const &
     {
         if (m_Success)
+        {
             throw std::runtime_error{"Attempted to access error in an Ok result"};
+        }
         return m_Error;
     }
 
     E&& Error() &&
     {
         if (m_Success)
+        {
             throw std::runtime_error{"Attempted to access error in an Ok result"};
+        }
         return m_Error;
     }
 
