@@ -101,8 +101,12 @@ std::string TcpConnection::GetRequestedPath() const
 {
     std::string path{};
     if (auto it = std::ranges::find(m_RequestBuffer, '/'); it != m_RequestBuffer.end())
+    {
         for (; *it != ' '; ++it)
+        {
             path += *it;
+        }
+    }
 
     return (path == "/") ? path + "index.html" : path;
 }
@@ -111,7 +115,9 @@ std::optional<std::string> TcpConnection::GetFileContents(const fs::path& path)
 {
     std::ifstream file(path);
     if (!file)
+    {
         return std::nullopt;
+    }
 
     const auto fileSize = std::filesystem::file_size(path);
     std::string contents(fileSize, 0);

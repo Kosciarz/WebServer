@@ -57,5 +57,6 @@ fs::path WebServer::FindServerRoot()
         }
         path = path.parent_path();
     }
+
     return path;
 }
