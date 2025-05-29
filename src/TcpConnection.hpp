@@ -26,7 +26,7 @@ public:
     asio::ip::tcp::socket& Socket();
 
 private:
-    void HandleRead(const asio::error_code& ec, std::size_t bytesRead);
+    void HandleRead(const asio::error_code& readError, std::size_t bytesRead);
 
     void HandleWrite(const asio::error_code& writeError, std::size_t bytesTransferred);
 

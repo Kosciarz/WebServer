@@ -18,12 +18,12 @@ using namespace asio::ip;
 using namespace std::placeholders;
 namespace fs = std::filesystem;
 
-TcpConnection::TcpConnection(asio::io_context& context, std::filesystem::path staticFileRoot)
+TcpConnection::TcpConnection(asio::io_context& context, fs::path staticFileRoot)
     : m_Socket{context}, m_RequestBuffer{}, m_StaticFilesRoot{std::move(staticFileRoot)}
 {
 }
 
-TcpConnection::Pointer TcpConnection::Create(asio::io_context& context, const std::filesystem::path& staticFileRoot)
+TcpConnection::Pointer TcpConnection::Create(asio::io_context& context, const fs::path& staticFileRoot)
 {
     return std::make_shared<TcpConnection>(context, staticFileRoot);
 }
