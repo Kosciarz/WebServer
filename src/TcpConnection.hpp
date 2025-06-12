@@ -30,7 +30,7 @@ private:
 
     void HandleWrite(const asio::error_code& writeError, std::size_t bytesTransferred);
 
-    std::string GetRequestedPath() const;
+    std::filesystem::path GetRequestedPath() const;
 
     static std::optional<std::string> GetFileContents(const std::filesystem::path& path);
 

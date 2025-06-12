@@ -49,34 +49,33 @@ void TcpConnection::Close()
 
 void TcpConnection::HandleRead(const asio::error_code& readError, const std::size_t bytesRead)
 {
-    if (!readError)
-    {
-        std::cout << "Request: " << '\n'
-            << std::string{m_RequestBuffer.data(), bytesRead} << '\n';
-
-        const auto path = m_StaticFilesRoot / "index.html";
-        std::cout << "Requested path: " << path.string() << '\n';
-
-        std::string reply{};
-        if (const auto contents = GetFileContents(path); contents)
-            reply = "HTTP/1.1 200 OK\r\n\r\n" + *contents + "\r\n";
-        else
-            reply = "HTTP/1.1 400\r\n\r\n Not Found\r\n";
-
-        asio::async_write(
-            m_Socket,
-            asio::buffer(reply.data(), reply.size()),
-            [self = shared_from_this()](const asio::error_code& writeError, const std::size_t bytesTransferred)
-            {
-                self->HandleWrite(writeError, bytesTransferred);
-            }
-        );
-    }
-    else
+    if (readError)
     {
         std::cerr << "Read error: " << readError.message() << '\n';
         Close();
+        return;
     }
+
+    std::cout << "Request: " << '\n'
+        << std::string{m_RequestBuffer.data(), bytesRead} << '\n';
+
+    const auto path = m_StaticFilesRoot / GetRequestedPath();
+    std::cout << "Requested path: " << path.string() << '\n';
+
+    std::string reply{};
+    if (const auto contents = GetFileContents(path); contents)
+        reply = "HTTP/1.1 200 OK\r\n\r\n" + *contents + "\r\n";
+    else
+        reply = "HTTP/1.1 400\r\n\r\n Not Found\r\n";
+
+    asio::async_write(
+        m_Socket,
+        asio::buffer(reply.data(), reply.size()),
+        [self = shared_from_this()](const asio::error_code& writeError, const std::size_t bytesTransferred)
+        {
+            self->HandleWrite(writeError, bytesTransferred);
+        }
+    );
 }
 
 void TcpConnection::HandleWrite(const asio::error_code& writeError, const std::size_t bytesTransferred)
@@ -89,18 +88,17 @@ void TcpConnection::HandleWrite(const asio::error_code& writeError, const std::s
     Close();
 }
 
-std::string TcpConnection::GetRequestedPath() const
+fs::path TcpConnection::GetRequestedPath() const
 {
     std::string path{};
     if (auto it = std::ranges::find(m_RequestBuffer, '/'); it != m_RequestBuffer.end())
     {
-        for (; *it != ' '; ++it)
+        for (; *it != ' ' && it != m_RequestBuffer.end(); ++it)
         {
             path += *it;
         }
     }
-
-    return (path == "/") ? path + "index.html" : path;
+    return (path == "/") ? "index.html" : path.substr(1);
 }
 
 std::optional<std::string> TcpConnection::GetFileContents(const fs::path& path)
