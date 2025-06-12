@@ -32,16 +32,12 @@ void WebServer::StartAccept()
     );
 }
 
-void WebServer::HandleAccept(const TcpConnection::Pointer& connection, const asio::error_code& ec)
+void WebServer::HandleAccept(const TcpConnection::Ptr& connection, const asio::error_code& ec)
 {
     if (!ec)
-    {
         connection->Start();
-    }
     else
-    {
         std::cerr << "Accept error: " << ec.message() << '\n';
-    }
 
     StartAccept();
 }
@@ -52,11 +48,9 @@ fs::path WebServer::FindServerRoot()
     while (path.has_relative_path() && path.filename() != "WebServer")
     {
         if (path == path.root_path())
-        {
             return {};
-        }
+
         path = path.parent_path();
     }
-
     return path;
 }

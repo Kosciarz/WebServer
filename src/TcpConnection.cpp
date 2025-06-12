@@ -23,7 +23,7 @@ TcpConnection::TcpConnection(asio::io_context& context, fs::path staticFileRoot)
 {
 }
 
-TcpConnection::Pointer TcpConnection::Create(asio::io_context& context, const fs::path& staticFileRoot)
+TcpConnection::Ptr TcpConnection::Create(asio::io_context& context, const fs::path& staticFileRoot)
 {
     return std::make_shared<TcpConnection>(context, staticFileRoot);
 }
@@ -59,13 +59,9 @@ void TcpConnection::HandleRead(const asio::error_code& readError, const std::siz
 
         std::string reply{};
         if (const auto contents = GetFileContents(path); contents)
-        {
             reply = "HTTP/1.1 200 OK\r\n\r\n" + *contents + "\r\n";
-        }
         else
-        {
             reply = "HTTP/1.1 400\r\n\r\n Not Found\r\n";
-        }
 
         asio::async_write(
             m_Socket,
@@ -86,13 +82,9 @@ void TcpConnection::HandleRead(const asio::error_code& readError, const std::siz
 void TcpConnection::HandleWrite(const asio::error_code& writeError, const std::size_t bytesTransferred)
 {
     if (!writeError)
-    {
         std::cout << "Bytes transferred: " << bytesTransferred << '\n';
-    }
     else
-    {
         std::cerr << "Write error: " << writeError.message() << '\n';
-    }
 
     Close();
 }
@@ -115,9 +107,7 @@ std::optional<std::string> TcpConnection::GetFileContents(const fs::path& path)
 {
     std::ifstream file(path);
     if (!file)
-    {
         return std::nullopt;
-    }
 
     const auto fileSize = std::filesystem::file_size(path);
     std::string contents(fileSize, 0);

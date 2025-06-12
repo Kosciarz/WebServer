@@ -15,7 +15,7 @@ public:
 private:
     void StartAccept();
 
-    void HandleAccept(const TcpConnection::Pointer& connection, const asio::error_code& ec);
+    void HandleAccept(const TcpConnection::Ptr& connection, const asio::error_code& ec);
 
     static std::filesystem::path FindServerRoot();
 
